@@ -13,7 +13,7 @@ __author__ = 'Rick Torzynski <ricktorzynski@gmail.com>'
 __source__ = ''
 
 app = Flask(__name__)
-UPLOAD_FOLDER = './static/uploads'
+UPLOAD_FOLDER = './src/static/uploads'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER 
 app.config['MAX_CONTENT_LENGTH'] = 10 * 1024 * 1024
 
@@ -29,13 +29,18 @@ def about():
 def upload_file():
    if request.method == 'POST':
       f = request.files['file']
+      print("file: ")
+      print(f)
 
       # create a secure filename
       filename = secure_filename(f.filename)
 
       # save file to /static/uploads
       filepath = os.path.join(app.config['UPLOAD_FOLDER'],filename)
+      print("filepath:")
+      print(filepath)
       f.save(filepath)
+      print("saved!")
       
       # load the example image and convert it to grayscale
       image = cv2.imread(filepath)
