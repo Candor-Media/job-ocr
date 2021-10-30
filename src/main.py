@@ -60,4 +60,4 @@ def upload_file():
       return render_template("uploaded.html", displaytext=text, fname=filename)
 
 if __name__ == '__main__':
-   app.run(host="0.0.0.0", port=5000, debug=True)
+   app.run(host="0.0.0.0", port=os.environ['PORT'] or 5000, debug=True)

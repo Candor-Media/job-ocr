@@ -23,4 +23,4 @@ WORKDIR /app
 RUN pipenv install --skip-lock
 
 ENTRYPOINT ["python"]
-CMD ["main.py"]
+CMD ["src/main.py"]
