@@ -60,4 +60,10 @@ def upload_file():
       return render_template("uploaded.html", displaytext=text, fname=filename)
 
 if __name__ == '__main__':
-   app.run(host="0.0.0.0", port=os.environ['PORT'] or 5000, debug=True)
+  DEFAULT_PORT = 5000
+  try:
+    PORT = os.environ['PORT'] or DEFAULT_PORT
+  except BaseException as e:
+    PORT = DEFAULT_PORT
+
+  app.run(host="0.0.0.0", port=PORT, debug=True)
