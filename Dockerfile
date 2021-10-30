@@ -22,5 +22,5 @@ WORKDIR /app
 # Install python dependencies
 RUN pipenv install --skip-lock
 
-ENTRYPOINT ["python"]
+ENTRYPOINT ["pipenv", "run", "python"]
 CMD ["src/main.py"]
