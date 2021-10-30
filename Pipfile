@@ -1,0 +1,24 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+pillow = "*"
+pytesseract = "*"
+opencv-contrib-python = "*"
+certifi = "*"
+Click = "*"
+Flask = "*"
+gunicorn = "*"
+itsdangerous = "*"
+Jinja2 = "*"
+MarkupSafe = "*"
+numpy = "*"
+werkzeug = "*"
+
+[dev-packages]
+"autopep8" = "*"
+
+[requires]
+python_version = "3.6"
