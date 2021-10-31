@@ -1,4 +1,5 @@
 # https://www.youtube.com/watch?v=W9oRTI6mLnU
+# https://www.geeksforgeeks.org/feature-matching-using-brute-force-in-opencv/
 
 from flask import Flask, render_template, request
 from werkzeug.utils import secure_filename
@@ -18,39 +19,48 @@ OUTPUT_FILENAME = '_ocr_output.txt'
 filepath = os.path.join(UPLOAD_FOLDER,INPUT_IMG_FILENAME)
 print("filepath: " + filepath)
 
+''' Load Source & Target Images '''
 # load the example image and convert it to grayscale
 image = cv2.imread(filepath)
+targetImage = rotate_image(image, 10)
 # cv2.imwrite(os.path.join(UPLOAD_FOLDER, '_image.png'), image)
 gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 h, w = gray.shape
 # gray = cv2.resize(gray, (w//3, h//3))
 # cv2.imwrite(os.path.join(UPLOAD_FOLDER, '_gray.png'), gray)
 
+''' Create ORB '''
 orb = cv2.ORB_create(10000)
 kp1, des1 = orb.detectAndCompute(image, None)
-impKp1 = cv2.drawKeypoints(image, kp1, None)
+# impKp1 = cv2.drawKeypoints(image, kp1, None)
 # cv2.imwrite(os.path.join(UPLOAD_FOLDER, '_impKp1.png'), impKp1)
-kp2, des2 = orb.detectAndCompute(image, None)
+kp2, des2 = orb.detectAndCompute(targetImage, None)
+
+''' Compute Matches '''
 bf = cv2.BFMatcher(cv2.NORM_HAMMING)
 matches = bf.match(des1, des2)
 print(len(matches))
 sorted_matches = sorted(matches, key=lambda x: x.distance)
-good_matches = sorted_matches[:int(len(matches)/50)]
+good_matches = sorted_matches[:int(len(matches)/2500)]
 print('Nbr of good matches: ' + str(len(good_matches)))
 
-targetImage = rotate_image(image, -3)
-imgMatch = cv2.drawMatches(image, kp2, targetImage, kp1, good_matches, None, flags=2)
+''' Draw Matches '''
+imgMatch = cv2.drawMatches(targetImage, kp2, image, kp1, good_matches, None, flags=2)
 cv2.imwrite(os.path.join(UPLOAD_FOLDER, '_imgMatch.png'), imgMatch)
 
+''' Compute Transform Matrix '''
 srcPoints = np.float32([kp2[m.queryIdx].pt for m in good_matches]).reshape(-1, 1, 2)
 dstPoints = np.float32([kp1[m.queryIdx].pt for m in good_matches]).reshape(-1, 1, 2)
 
 M, _ = cv2.findHomography(srcPoints, dstPoints, cv2.RANSAC, 5.0)
 # print('M:')
 # print(M)
+
+''' Transform Target Image '''
 imgScan = cv2.warpPerspective(targetImage, M, (w, h))
 cv2.imwrite(os.path.join(UPLOAD_FOLDER, '_imgScan.png'), imgScan)
 
+''' Perform OCR '''
 # # apply thresholding to preprocess the image
 # imgScan = cv2.threshold(imgScan, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)[1]
 
