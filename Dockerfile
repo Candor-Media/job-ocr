@@ -22,5 +22,10 @@ WORKDIR /app
 # Install python dependencies
 RUN pipenv install --skip-lock
 
+ENV TESSDATA_PREFIX=/usr/share/tesseract-ocr/4.00/tessdata
+
+RUN apt-get install wget
+RUN wget -O /usr/share/tesseract-ocr/4.00/tessdata/hin.traineddata https://github.com/tesseract-ocr/tessdata/raw/main/hin.traineddata
+
 ENTRYPOINT ["pipenv", "run", "python"]
 CMD ["src/main.py"]

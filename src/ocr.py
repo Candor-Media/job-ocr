@@ -18,6 +18,7 @@ OUTPUT_FILENAME = '_ocr_output.txt'
 FEATURE_NBR = 1000
 GOOD_MATCHES_RATIO = 5 / FEATURE_NBR
 ROTATION_ANGLE = 0
+TESSERACT_CONFIG = r'-l eng+hin --psm 6'
 
 filepath = os.path.join(UPLOAD_FOLDER,INPUT_IMG_FILENAME)
 print("filepath: " + filepath)
@@ -83,7 +84,7 @@ cv2.imwrite(os.path.join(UPLOAD_FOLDER, '_imgScan.png'), imgScan)
 # # perform OCR on the processed image
 # # text = pytesseract.image_to_string(Image.open(ofilename))
 print('Starting OCR...')
-text = pytesseract.image_to_string(imgScan)
+text = pytesseract.image_to_string(imgScan, config=TESSERACT_CONFIG)
 
 # # remove the processed image
 # os.remove(ofilename)
