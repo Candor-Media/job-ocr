@@ -15,6 +15,7 @@ from utils import rotate_image
 INPUT_IMG_FILENAME = '12th_MARKSHEET.JPG'
 UPLOAD_FOLDER = './src/static/uploads'
 OUTPUT_FILENAME = '_ocr_output.txt'
+GOOD_MATCHES_RATIO = 0.01
 
 filepath = os.path.join(UPLOAD_FOLDER,INPUT_IMG_FILENAME)
 print("filepath: " + filepath)
@@ -32,17 +33,20 @@ h, w = gray.shape
 ''' Create ORB '''
 orb = cv2.ORB_create(10000)
 kp1, des1 = orb.detectAndCompute(image, None)
-# impKp1 = cv2.drawKeypoints(image, kp1, None)
-# cv2.imwrite(os.path.join(UPLOAD_FOLDER, '_impKp1.png'), impKp1)
+impKp1 = cv2.drawKeypoints(image, kp1, None)
+cv2.imwrite(os.path.join(UPLOAD_FOLDER, '_impKp1.png'), impKp1)
 kp2, des2 = orb.detectAndCompute(targetImage, None)
+impKp2 = cv2.drawKeypoints(targetImage, kp2, None)
+cv2.imwrite(os.path.join(UPLOAD_FOLDER, '_impKp2.png'), impKp2)
 
 ''' Compute Matches '''
 bf = cv2.BFMatcher(cv2.NORM_HAMMING)
 matches = bf.match(des1, des2)
-print(len(matches))
+print('Nbr of matches: ' + str(len(matches)))
 sorted_matches = sorted(matches, key=lambda x: x.distance)
-good_matches = sorted_matches[:int(len(matches)/2500)]
+good_matches = sorted_matches[:int(len(matches) * GOOD_MATCHES_RATIO)]
 print('Nbr of good matches: ' + str(len(good_matches)))
+[print('Distance: ' + str(x.distance)) for x in good_matches]
 
 ''' Draw Matches '''
 imgMatch = cv2.drawMatches(targetImage, kp2, image, kp1, good_matches, None, flags=2)
