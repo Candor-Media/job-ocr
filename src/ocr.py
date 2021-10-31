@@ -15,23 +15,38 @@ from utils import rotate_image
 INPUT_IMG_FILENAME = '12th_MARKSHEET.JPG'
 UPLOAD_FOLDER = './src/static/uploads'
 OUTPUT_FILENAME = '_ocr_output.txt'
-GOOD_MATCHES_RATIO = 0.01
+FEATURE_NBR = 1000
+GOOD_MATCHES_RATIO = 5 / FEATURE_NBR
+ROTATION_ANGLE = 0
 
 filepath = os.path.join(UPLOAD_FOLDER,INPUT_IMG_FILENAME)
 print("filepath: " + filepath)
 
 ''' Load Source & Target Images '''
-# load the example image and convert it to grayscale
 image = cv2.imread(filepath)
-targetImage = rotate_image(image, 10)
+height, width, _ = image.shape
+
+# Turn image to grayscale
+image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
+# image = cv2.resize(image, (w//3, h//3))
 # cv2.imwrite(os.path.join(UPLOAD_FOLDER, '_image.png'), image)
-gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-h, w = gray.shape
-# gray = cv2.resize(gray, (w//3, h//3))
-# cv2.imwrite(os.path.join(UPLOAD_FOLDER, '_gray.png'), gray)
+
+# apply thresholding to preprocess the image
+image = cv2.threshold(image, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)[1]
+
+# apply median blurring to remove any blurring
+imgScan = cv2.medianBlur(image, 3)
+
+# # # save the processed image in the /static/uploads directory
+# # ofilename = os.path.join(UPLOAD_FOLDER,"{}.png".format(os.getpid()))
+# # cv2.imwrite(ofilename, imgScan)
+
+targetImage = rotate_image(image, ROTATION_ANGLE)
+# cv2.imwrite(os.path.join(UPLOAD_FOLDER, '_image.png'), image)
 
 ''' Create ORB '''
-orb = cv2.ORB_create(10000)
+orb = cv2.ORB_create(FEATURE_NBR)
 kp1, des1 = orb.detectAndCompute(image, None)
 impKp1 = cv2.drawKeypoints(image, kp1, None)
 cv2.imwrite(os.path.join(UPLOAD_FOLDER, '_impKp1.png'), impKp1)
@@ -61,20 +76,10 @@ M, _ = cv2.findHomography(srcPoints, dstPoints, cv2.RANSAC, 5.0)
 # print(M)
 
 ''' Transform Target Image '''
-imgScan = cv2.warpPerspective(targetImage, M, (w, h))
+imgScan = cv2.warpPerspective(targetImage, M, (width, height))
 cv2.imwrite(os.path.join(UPLOAD_FOLDER, '_imgScan.png'), imgScan)
 
 ''' Perform OCR '''
-# # apply thresholding to preprocess the image
-# imgScan = cv2.threshold(imgScan, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)[1]
-
-# # apply median blurring to remove any blurring
-# imgScan = cv2.medianBlur(imgScan, 3)
-
-# # # save the processed image in the /static/uploads directory
-# # ofilename = os.path.join(UPLOAD_FOLDER,"{}.png".format(os.getpid()))
-# # cv2.imwrite(ofilename, imgScan)
-
 # # perform OCR on the processed image
 # # text = pytesseract.image_to_string(Image.open(ofilename))
 print('Starting OCR...')
